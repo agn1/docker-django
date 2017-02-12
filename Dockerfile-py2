@@ -1,0 +1,40 @@
+FROM ubuntu:16.04
+
+MAINTAINER Dockerfiles
+
+# Install required packages and remove the apt packages cache when done.
+
+RUN apt-get update && apt-get install -y \
+	git \
+	python \
+	python-dev \
+	python-setuptools \
+	python-pip \
+	nginx \
+	supervisor \
+	sqlite3 \
+        libldap2-dev \
+        libsasl2-dev \
+        libssl-dev \
+        python-openssl \
+        python-psycopg2 \
+  &&    echo "daemon off;" >> /etc/nginx/nginx.conf \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt /home/docker/
+COPY nginx-app.conf /etc/nginx/sites-available/default
+COPY supervisor-app.conf /etc/supervisor/conf.d/
+COPY uwsgi.ini /etc/supervisor/
+COPY uwsgi_params /etc/nginx/
+
+# add (the rest of) our code
+#COPY . /home/docker/code/
+
+RUN pip install -r /home/docker/requirements.txt 
+
+# install django, normally you would remove this step because your project would already
+# be installed in the code/app/ directory
+#RUN django-admin.py startproject website /home/docker/code/app/
+
+EXPOSE 80 
+CMD ["supervisord", "-n"]

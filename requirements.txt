@@ -1,0 +1,6 @@
+uwsgi
+django
+python-ldap
+django-auth-ldap
+pyOpenSSL
+psycopg2
